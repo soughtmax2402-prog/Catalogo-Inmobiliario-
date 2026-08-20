@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel de administrador</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,500&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#1F2A64;
+    --navy-deep:#12193F;
+    --gold:#E6C24A;
+    --gold-soft:#F3E2A8;
+    --ivory:#F7F4EC;
+    --carbon:#24262E;
+    --gray:#5B5E6B;
+    --line:#DED6C2;
+    --radius:2px;
+    --danger:#B23A3A;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Lato',sans-serif;background:var(--ivory);color:var(--carbon);line-height:1.5;}
+  h1,h2,h3{font-family:'Playfair Display',serif;font-weight:600;}
+  header{background:var(--navy);color:#fff;padding:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+  header h1{font-size:1.3rem;color:var(--gold-soft);}
+  header a{color:rgba(255,255,255,.7);font-size:.85rem;text-decoration:none;}
+  header a:hover{color:#fff;}
+  main{max-width:1100px;margin:0 auto;padding:24px 16px 60px;}
+
+  .card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:24px;}
+  .center{text-align:center;max-width:520px;margin:60px auto;}
+  .center p{color:var(--gray);margin:14px 0 20px;font-size:.92rem;}
+
+  button, .btn{
+    font-family:inherit;font-size:.85rem;font-weight:700;letter-spacing:.02em;
+    background:var(--navy);color:#fff;border:none;border-radius:var(--radius);
+    padding:10px 18px;cursor:pointer;text-transform:uppercase;font-size:.75rem;
+  }
+  button:hover{background:var(--navy-deep);}
+  button.gold{background:var(--gold);color:var(--navy-deep);}
+  button.gold:hover{background:#d8ae2f;}
+  button.danger{background:var(--danger);}
+  button.danger:hover{background:#8f2c2c;}
+  button.ghost{background:none;color:var(--navy);border:1px solid var(--line);}
+  button.ghost:hover{background:#f2efe6;}
+  button:disabled{opacity:.4;cursor:not-allowed;}
+
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+  .toolbar input[type=search]{
+    padding:9px 12px;border:1px solid var(--line);border-radius:var(--radius);font-family:inherit;font-size:.85rem;min-width:220px;
+  }
+  .toolbar select{
+    padding:9px 12px;border:1px solid var(--line);border-radius:var(--radius);font-family:inherit;font-size:.85rem;background:#fff;
+  }
+  #contadorAdmin{color:var(--gray);font-size:.82rem;}
+
+  .tablaWrap{overflow-x:auto;background:#fff;border:1px solid var(--line);border-radius:var(--radius);}
+  table{width:100%;border-collapse:collapse;font-size:.85rem;}
+  th, td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap;}
+  th{background:var(--ivory);font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--gray);}
+  td small{color:var(--gray);}
+  tr:hover td{background:#fbfaf6;}
+  .miniThumb{width:52px;height:40px;object-fit:cover;border-radius:2px;display:block;background:var(--line);}
+  .miniThumb.sinFoto{background:linear-gradient(160deg,var(--navy) 0%,var(--navy-deep) 100%);}
+
+  .overlay{
+    display:none;position:fixed;inset:0;background:rgba(18,25,63,.78);z-index:300;
+    align-items:flex-start;justify-content:center;padding:24px 14px;overflow-y:auto;
+  }
+  .overlay.open{display:flex;}
+  .confirmOverlay{
+    position:fixed;inset:0;background:rgba(18,25,63,.78);z-index:400;
+    display:flex;align-items:center;justify-content:center;padding:20px;
+  }
+  .confirmBox{background:#fff;border-radius:var(--radius);max-width:380px;width:100%;padding:22px;}
+  .confirmBox p{font-size:.92rem;margin-bottom:18px;white-space:pre-line;}
+  .confirmBtns{display:flex;justify-content:flex-end;gap:10px;}
+  .editorBox{background:#fff;border-radius:var(--radius);max-width:680px;width:100%;padding:26px;margin-bottom:40px;}
+  .editorBox h2{color:var(--navy-deep);margin-bottom:16px;}
+  .campo{margin-bottom:14px;}
+  .campo label{display:block;font-size:.78rem;font-weight:700;color:var(--navy);margin-bottom:5px;text-transform:uppercase;letter-spacing:.03em;}
+  .campo input[type=text], .campo input[type=number], .campo select, .campo textarea{
+    width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:var(--radius);font-family:inherit;font-size:.9rem;background:#fff;
+  }
+  .campo textarea{resize:vertical;min-height:70px;}
+  .fila2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .fila3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+  .creditoRow{display:flex;gap:14px;flex-wrap:wrap;}
+  .creditoRow label{display:flex;align-items:center;gap:6px;font-size:.85rem;font-weight:400;text-transform:none;color:var(--carbon);}
+
+  .seccionFotos{border-top:1px solid var(--line);margin-top:18px;padding-top:16px;}
+  .fotosGrid{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0;}
+  .fotoThumb{position:relative;width:90px;height:90px;}
+  .fotoThumb img{width:100%;height:100%;object-fit:cover;border-radius:3px;border:1px solid var(--line);}
+  .fotoThumb button{
+    position:absolute;top:-8px;right:-8px;width:22px;height:22px;padding:0;border-radius:50%;
+    background:var(--danger);font-size:.75rem;line-height:1;
+  }
+  .avisoFotos{color:var(--gray);font-size:.85rem;background:var(--ivory);padding:12px;border-radius:2px;}
+
+  .accionesEditor{display:flex;justify-content:space-between;align-items:center;margin-top:20px;gap:10px;flex-wrap:wrap;}
+  .accionesEditor .der{display:flex;gap:10px;}
+
+  .estado{font-size:.8rem;color:var(--gray);margin-top:10px;}
+  .estado.ok{color:#2f7a3d;}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Panel de administrador</h1>
+  <a href="index.html">← Volver al catálogo</a>
+</header>
+
+<main>
+
+  <div id="lock" class="card center">
+    <h2>Acceso restringido</h2>
+    <p>Escribe la contraseña para entrar al panel.</p>
+    <form onsubmit="verificarPassword(event)">
+      <div class="campo" style="text-align:left;">
+        <input type="password" id="passInput" autocomplete="off" autofocus>
+      </div>
+      <button type="submit" class="gold">Entrar</button>
+    </form>
+    <div id="lockError" class="estado" style="color:var(--danger);"></div>
+  </div>
+
+  <div id="gate" class="card center" style="display:none;">
+    <h2>Dar permiso para editar tus archivos</h2>
+    <p>Esto <strong>no sube nada a internet</strong>: solo le da permiso a este navegador para abrir y guardar archivos en tu propia computadora, igual que cuando abres un archivo en Word. Solo tienes que hacerlo la primera vez.</p>
+
+    <div id="gateSavedInfo" style="display:none;margin:18px 0;padding:16px;background:var(--ivory);border-radius:2px;">
+      <p style="margin-bottom:12px;font-size:.88rem;">Ya conectaste esta carpeta antes: <strong class="nombreCarpeta"></strong></p>
+      <button class="gold" onclick="continuarConCarpetaGuardada()">Continuar con esta carpeta</button>
+      <div style="margin-top:10px;"><a href="#" onclick="mostrarSelectorManual();return false;" style="font-size:.8rem;color:var(--gray);">Es otra carpeta / no funciona</a></div>
+    </div>
+
+    <div id="gateSelectorManual">
+      <p style="margin-bottom:14px;font-size:.85rem;color:var(--gray);">Elige la carpeta <strong>Catalogo Inmobiliaria</strong> (la misma donde está este archivo):</p>
+      <button class="gold" id="btnConectar" onclick="conectar()">Seleccionar carpeta del catálogo</button>
+    </div>
+    <div id="gateError" class="estado"></div>
+  </div>
+
+  <div id="panel" style="display:none;">
+    <div class="toolbar">
+      <input type="search" id="buscador" placeholder="Buscar por nombre o ID…" oninput="renderTabla()">
+      <select id="filtroTipo" onchange="renderTabla()">
+        <option value="cualquiera">Todos los tipos</option>
+        <option value="Casa">Casa</option>
+        <option value="Departamento">Departamento</option>
+        <option value="Terreno">Terreno</option>
+        <option value="Local">Local</option>
+        <option value="Oficina">Oficina</option>
+      </select>
+      <select id="ordenTabla" onchange="renderTabla()">
+        <option value="nombre_asc">Nombre A-Z</option>
+        <option value="nombre_desc">Nombre Z-A</option>
+        <option value="precio_asc">Precio: menor a mayor</option>
+        <option value="precio_desc">Precio: mayor a menor</option>
+      </select>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <span id="contadorAdmin"></span>
+        <button class="gold" onclick="nuevaPropiedad()">+ Nueva propiedad</button>
+      </div>
+    </div>
+    <div class="tablaWrap">
+      <table>
+        <thead>
+          <tr><th></th><th>Nombre / ID</th><th>Tipo</th><th>Operación</th><th>Precio</th><th>Zona</th><th>Acciones</th></tr>
+        </thead>
+        <tbody id="tablaBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+<div class="overlay" id="editorOverlay">
+  <div class="editorBox">
+    <h2 id="editorTitulo">Propiedad</h2>
+    <form id="formEditor" onsubmit="guardarForm(event)">
+      <div class="campo">
+        <label>ID</label>
+        <input type="text" id="fId" disabled>
+      </div>
+      <div class="fila2">
+        <div class="campo">
+          <label>Tipo de inmueble *</label>
+          <select id="fTipoInmueble" required>
+            <option value="Casa">Casa</option>
+            <option value="Departamento">Departamento</option>
+            <option value="Terreno">Terreno</option>
+            <option value="Local">Local</option>
+            <option value="Oficina">Oficina</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label>Operación *</label>
+          <select id="fTipo" required>
+            <option value="venta">Venta</option>
+            <option value="renta">Renta</option>
+          </select>
+        </div>
+      </div>
+      <div class="campo">
+        <label>Nombre de la propiedad *</label>
+        <input type="text" id="fName" required placeholder='Ej: "Casa Los Álamos"'>
+      </div>
+      <div class="fila2">
+        <div class="campo">
+          <label>Zona (texto que se muestra) *</label>
+          <input type="text" id="fZonaTexto" required placeholder='Ej: "Tepic – Fracc. Bonaterra"'>
+        </div>
+        <div class="campo">
+          <label>Zona (para filtros) *</label>
+          <select id="fZonaKey" required>
+            <option value="Tepic">Tepic</option>
+            <option value="Xalisco">Xalisco</option>
+            <option value="San Blas">San Blas</option>
+            <option value="Bahía de Banderas">Bahía de Banderas</option>
+            <option value="Compostela">Compostela</option>
+            <option value="Santa María del Oro">Santa María del Oro</option>
+          </select>
+        </div>
+      </div>
+      <div class="campo">
+        <label>Precio (MXN) *</label>
+        <input type="number" id="fPrecio" required min="0" step="1000">
+      </div>
+      <div class="fila3">
+        <div class="campo">
+          <label>Recámaras</label>
+          <input type="number" id="fRec" min="0" step="1">
+        </div>
+        <div class="campo">
+          <label>Estacionamientos</label>
+          <input type="number" id="fEst" min="0" step="1">
+        </div>
+        <div class="campo">
+          <label>m² construidos</label>
+          <input type="number" id="fM2" min="0" step="1">
+        </div>
+      </div>
+      <div class="campo">
+        <label>Baños (texto libre)</label>
+        <input type="text" id="fBanos" placeholder='Ej: "2 completos + 1 medio"'>
+      </div>
+      <div class="campo">
+        <label>Formas de crédito aceptadas</label>
+        <div class="creditoRow">
+          <label><input type="checkbox" class="creditoChk" value="Contado"> Contado</label>
+          <label><input type="checkbox" class="creditoChk" value="Bancario"> Bancario</label>
+          <label><input type="checkbox" class="creditoChk" value="Infonavit"> Infonavit</label>
+          <label><input type="checkbox" class="creditoChk" value="Fovissste"> Fovissste</label>
+        </div>
+      </div>
+      <div class="campo">
+        <label>Descripción corta (se ve en la tarjeta)</label>
+        <textarea id="fDesc" placeholder="1-2 frases breves"></textarea>
+      </div>
+      <div class="campo">
+        <label>Descripción completa (se ve al abrir la propiedad)</label>
+        <textarea id="fDetalle" style="min-height:120px;" placeholder="Puedes usar varios párrafos"></textarea>
+      </div>
+
+      <div class="seccionFotos">
+        <label style="display:block;font-size:.78rem;font-weight:700;color:var(--navy);margin-bottom:8px;text-transform:uppercase;letter-spacing:.03em;">Fotos</label>
+        <div id="avisoFotos" class="avisoFotos" style="display:none;">Guarda la propiedad primero (botón "Guardar" abajo) para poder agregar fotos.</div>
+        <div id="seccionFotos" style="display:none;">
+          <div class="fotosGrid" id="fotosGrid"></div>
+          <input type="file" id="inputFotos" accept="image/*" multiple onchange="onAgregarFotos(event)">
+        </div>
+      </div>
+
+      <div class="accionesEditor">
+        <button type="button" id="btnBorrar" class="danger" onclick="borrarPropiedadActual()">Borrar propiedad</button>
+        <div class="der">
+          <button type="button" class="ghost" onclick="cerrarEditor()">Cerrar</button>
+          <button type="submit" class="gold">Guardar</button>
+        </div>
+      </div>
+      <div id="estadoGuardado" class="estado"></div>
+    </form>
+  </div>
+</div>
+
+<script>
+let dirHandle = null;
+let properties = [];
+let fullHtmlText = '';
+let currentEditId = null;
+
+const PASSWORD_HASH = 'd4eae87b6d58d2ca';
+
+// Hash simple sin dependencias externas (no usa Web Crypto, así que funciona
+// siempre, incluso si el navegador restringe esa API para archivos locales).
+function simpleHash(text){
+  let h1 = 0xdeadbeef ^ text.length, h2 = 0x41c6ce57 ^ text.length;
+  for(let i = 0; i < text.length; i++){
+    const ch = text.charCodeAt(i);
+    h1 = Math.imul(h1 ^ ch, 2654435761);
+    h2 = Math.imul(h2 ^ ch, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  return (h1 >>> 0).toString(16).padStart(8, '0') + (h2 >>> 0).toString(16).padStart(8, '0');
+}
+
+async function verificarPassword(ev){
+  ev.preventDefault();
+  try{
+    const val = document.getElementById('passInput').value;
+    if(simpleHash(val) === PASSWORD_HASH){
+      document.getElementById('lock').style.display = 'none';
+      document.getElementById('gate').style.display = 'block';
+      intentarAutoConectar();
+    } else {
+      document.getElementById('lockError').textContent = 'Contraseña incorrecta.';
+      document.getElementById('passInput').value = '';
+      document.getElementById('passInput').focus();
+    }
+  }catch(e){
+    await customAlert('Error al verificar la contraseña: ' + e.message);
+  }
+}
+
+const START_MARKER = 'const properties = [';
+const END_ANCHOR = 'function money(';
+
+function findArrayBounds(text){
+  const startIdx = text.indexOf(START_MARKER);
+  if(startIdx === -1) return null;
+  const anchorIdx = text.indexOf(END_ANCHOR, startIdx);
+  if(anchorIdx === -1) return null;
+  const endIdx = text.lastIndexOf('];', anchorIdx);
+  if(endIdx === -1 || endIdx < startIdx) return null;
+  return {startIdx, endIdx};
+}
+const PREFIX = {Casa:"AHO", Departamento:"AAP", Terreno:"ALA", Local:"ALO", Oficina:"AOF"};
+
+function esc(s){
+  return String(s).replace(/\\/g,'\\\\').replace(/"/g,'\\"').replace(/\r?\n/g,'\\n');
+}
+function jsStr(s){ return '"' + esc(s) + '"'; }
+function jsVal(v){
+  if(v === null || v === undefined || v === '') return 'null';
+  if(typeof v === 'number') return String(v);
+  return jsStr(v);
+}
+function escHtml(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// Diálogos propios del panel: no dependen de confirm()/alert() nativos del
+// navegador, que en ciertos casos (p.ej. si se marcó "no volver a mostrar
+// diálogos de esta página") dejan de funcionar sin avisar.
+function customConfirm(message){
+  return new Promise(resolve => {
+    const overlay = document.createElement('div');
+    overlay.className = 'confirmOverlay';
+    overlay.innerHTML = `<div class="confirmBox"><p>${escHtml(message)}</p><div class="confirmBtns">
+      <button type="button" class="ghost" data-r="0">Cancelar</button>
+      <button type="button" class="danger" data-r="1">Aceptar</button>
+    </div></div>`;
+    document.body.appendChild(overlay);
+    overlay.addEventListener('click', ev => {
+      const btn = ev.target.closest('button');
+      if(!btn) return;
+      document.body.removeChild(overlay);
+      resolve(btn.dataset.r === '1');
+    });
+  });
+}
+function customAlert(message){
+  return new Promise(resolve => {
+    const overlay = document.createElement('div');
+    overlay.className = 'confirmOverlay';
+    overlay.innerHTML = `<div class="confirmBox"><p>${escHtml(message)}</p><div class="confirmBtns">
+      <button type="button" class="gold" data-r="1">Entendido</button>
+    </div></div>`;
+    document.body.appendChild(overlay);
+    overlay.addEventListener('click', ev => {
+      const btn = ev.target.closest('button');
+      if(!btn) return;
+      document.body.removeChild(overlay);
+      resolve();
+    });
+  });
+}
+
+// Guarda el permiso de la carpeta en este navegador para no tener que
+// volver a elegirla cada vez que se abre el panel.
+function idbOpen(){
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open('adminPanelDB', 1);
+    req.onupgradeneeded = () => req.result.createObjectStore('handles');
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+async function idbSet(key, val){
+  const db = await idbOpen();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('handles', 'readwrite');
+    tx.objectStore('handles').put(val, key);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+async function idbGet(key){
+  const db = await idbOpen();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('handles', 'readonly');
+    const req = tx.objectStore('handles').get(key);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+async function idbDel(key){
+  const db = await idbOpen();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('handles', 'readwrite');
+    tx.objectStore('handles').delete(key);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+let carpetaGuardadaHandle = null;
+
+async function intentarAutoConectar(){
+  const errEl = document.getElementById('gateError');
+  try{
+    const saved = await idbGet('dirHandle');
+    if(!saved) return;
+    const perm = await saved.queryPermission({mode:'readwrite'});
+    if(perm === 'granted'){
+      dirHandle = saved;
+      errEl.textContent = 'Conectando con "' + saved.name + '"…';
+      await cargar();
+      errEl.textContent = '';
+      return;
+    }
+    // Ya se conectó antes pero el navegador quiere confirmación de nuevo:
+    // mostramos un botón simple en vez de pedir volver a buscar la carpeta.
+    carpetaGuardadaHandle = saved;
+    document.getElementById('gateSelectorManual').style.display = 'none';
+    document.getElementById('gateSavedInfo').style.display = 'block';
+    document.querySelector('#gateSavedInfo .nombreCarpeta').textContent = saved.name;
+  }catch(e){
+    // sin carpeta guardada o handle inválido: se queda el flujo manual normal
+  }
+}
+
+async function continuarConCarpetaGuardada(){
+  const errEl = document.getElementById('gateError');
+  errEl.textContent = '';
+  try{
+    const perm = await carpetaGuardadaHandle.requestPermission({mode:'readwrite'});
+    if(perm === 'granted'){
+      dirHandle = carpetaGuardadaHandle;
+      await cargar();
+    } else {
+      errEl.textContent = 'No se concedió el permiso. Puedes intentar de nuevo o seleccionar la carpeta manualmente.';
+    }
+  }catch(e){
+    errEl.textContent = 'No pude reconectar: ' + e.message;
+  }
+}
+
+function mostrarSelectorManual(){
+  document.getElementById('gateSavedInfo').style.display = 'none';
+  document.getElementById('gateSelectorManual').style.display = 'block';
+}
+
+async function conectar(){
+  const btn = document.getElementById('btnConectar');
+  const errEl = document.getElementById('gateError');
+  errEl.textContent = '';
+  if(typeof window.showDirectoryPicker !== 'function'){
+    errEl.textContent = 'Tu navegador no soporta esta función. Abre este panel con Google Chrome o Microsoft Edge.';
+    return;
+  }
+  btn.disabled = true;
+  btn.textContent = 'Conectando…';
+  try{
+    dirHandle = await window.showDirectoryPicker({mode:'readwrite'});
+    try{ await idbSet('dirHandle', dirHandle); }catch(e){ /* si no se pudo guardar, no pasa nada grave */ }
+    await cargar();
+  }catch(e){
+    if(e.name !== 'AbortError'){
+      errEl.textContent = 'No se pudo abrir la carpeta: ' + e.message;
+    }
+  }finally{
+    btn.disabled = false;
+    btn.textContent = 'Seleccionar carpeta del catálogo';
+  }
+}
+
+async function cargar(){
+  const errEl = document.getElementById('gateError');
+  let fh;
+  try{
+    fh = await dirHandle.getFileHandle('index.html');
+  }catch(e){
+    errEl.textContent = 'No encontré index.html en esa carpeta. Selecciona la carpeta "Catalogo Inmobiliaria".';
+    return;
+  }
+  try{
+    const file = await fh.getFile();
+    fullHtmlText = await file.text();
+  }catch(e){
+    errEl.textContent = 'No pude leer index.html: ' + e.message;
+    return;
+  }
+  const bounds = findArrayBounds(fullHtmlText);
+  if(!bounds){
+    errEl.textContent = 'No pude encontrar el catálogo dentro de index.html.';
+    return;
+  }
+  const bodyText = fullHtmlText.slice(bounds.startIdx + START_MARKER.length, bounds.endIdx);
+  try{
+    properties = new Function('return [' + bodyText + ']')();
+  }catch(e){
+    errEl.textContent = 'El catálogo tiene un formato que no pude leer: ' + e.message;
+    return;
+  }
+  document.getElementById('gate').style.display = 'none';
+  document.getElementById('panel').style.display = 'block';
+  renderTabla();
+}
+
+async function guardarArchivo(){
+  const bounds = findArrayBounds(fullHtmlText);
+  if(!bounds) throw new Error('No pude encontrar el catálogo dentro de index.html.');
+  const arrText = properties.map(serializeProperty).join('\n');
+  const newText = fullHtmlText.slice(0, bounds.startIdx + START_MARKER.length) + '\n' + arrText + '\n' + fullHtmlText.slice(bounds.endIdx);
+  fullHtmlText = newText;
+  const fh = await dirHandle.getFileHandle('index.html', {create:false});
+  const w = await fh.createWritable();
+  await w.write(newText);
+  await w.close();
+}
+
+function serializeProperty(p){
+  let l1 = `  {id:${jsStr(p.id)}`;
+  if(p.fotos && p.fotos.length) l1 += `, fotos:[${p.fotos.map(jsStr).join(',')}]`;
+  l1 += `, tipoInmueble:${jsStr(p.tipoInmueble)}`;
+  if(p.archivoOrigen) l1 += `, archivoOrigen:${jsStr(p.archivoOrigen)}`;
+  l1 += `, name:${jsStr(p.name)}, zona:${jsStr(p.zona)}, zonaKey:${jsStr(p.zonaKey)}, tipo:${jsStr(p.tipo)}`;
+  if(p.esTerreno) l1 += `, esTerreno:true`;
+  l1 += `, precio:${jsVal(p.precio)}, rec:${jsVal(p.rec)}, banos:${jsVal(p.banos)}, est:${jsVal(p.est)}, m2:${jsVal(p.m2)}`;
+  l1 += `, credito:[${(p.credito||[]).map(jsStr).join(',')}]`;
+  l1 += `, desc:${jsStr(p.desc || '')},`;
+  const l2 = `    detalle:${jsStr(p.detalle || p.desc || '')}},`;
+  return l1 + '\n' + l2;
+}
+
+function generarId(tipo){
+  const prefix = PREFIX[tipo] || 'AHO';
+  let id;
+  do{
+    const num = Math.floor(1000000 + Math.random() * 9000000);
+    id = prefix + num;
+  } while(properties.some(p => p.id === id));
+  return id;
+}
+
+function renderTabla(){
+  const q = document.getElementById('buscador').value.trim().toLowerCase();
+  const tipo = document.getElementById('filtroTipo').value;
+  const orden = document.getElementById('ordenTabla').value;
+
+  let filtradas = properties.filter(p => !q || p.name.toLowerCase().includes(q) || p.id.toLowerCase().includes(q));
+  if(tipo !== 'cualquiera') filtradas = filtradas.filter(p => p.tipoInmueble === tipo);
+
+  filtradas = filtradas.slice().sort((a, b) => {
+    if(orden === 'precio_asc') return a.precio - b.precio;
+    if(orden === 'precio_desc') return b.precio - a.precio;
+    if(orden === 'nombre_desc') return b.name.localeCompare(a.name, 'es');
+    return a.name.localeCompare(b.name, 'es');
+  });
+
+  document.getElementById('contadorAdmin').textContent = `${filtradas.length} de ${properties.length} propiedades`;
+  const tbody = document.getElementById('tablaBody');
+  tbody.innerHTML = filtradas.map(p => `
+    <tr>
+      <td>${p.fotos && p.fotos.length ? `<img class="miniThumb" src="${p.fotos[0]}">` : '<div class="miniThumb sinFoto"></div>'}</td>
+      <td>${escHtml(p.name)}<br><small>${p.id}</small></td>
+      <td>${escHtml(p.tipoInmueble)}</td>
+      <td>${p.tipo === 'renta' ? 'Renta' : 'Venta'}</td>
+      <td>$${Number(p.precio).toLocaleString('es-MX')}</td>
+      <td>${escHtml(p.zona)}</td>
+      <td><button class="ghost" type="button" onclick="abrirEditor('${p.id}')">Editar</button> <button class="danger" type="button" onclick="borrarPropiedad('${p.id}')">Borrar</button></td>
+    </tr>`).join('') || '<tr><td colspan="7" style="color:var(--gray);">Sin resultados.</td></tr>';
+}
+
+async function getFotosDirHandle(create){
+  return dirHandle.getDirectoryHandle('fotos', {create});
+}
+async function getPropertyPhotoDir(id, create){
+  const fotosDir = await getFotosDirHandle(true);
+  return fotosDir.getDirectoryHandle(id, {create});
+}
+async function listPhotos(id){
+  try{
+    const dir = await getPropertyPhotoDir(id, false);
+    const names = [];
+    for await (const [name, handle] of dir.entries()){
+      if(handle.kind === 'file' && /\.(jpg|jpeg|png|webp)$/i.test(name)) names.push(name);
+    }
+    names.sort();
+    return names;
+  }catch(e){
+    return [];
+  }
+}
+
+let fotoObjectUrls = [];
+
+async function renderFotos(id){
+  const cont = document.getElementById('fotosGrid');
+  cont.innerHTML = '<div style="color:var(--gray);font-size:.85rem;">Cargando fotos…</div>';
+  // libera las URLs de la vista anterior para no acumular memoria
+  fotoObjectUrls.forEach(u => URL.revokeObjectURL(u));
+  fotoObjectUrls = [];
+  try{
+    const names = await listPhotos(id);
+    if(names.length === 0){
+      cont.innerHTML = '<div style="color:var(--gray);font-size:.85rem;">Sin fotos todavía.</div>';
+      return;
+    }
+    const dir = await getPropertyPhotoDir(id, false);
+    const items = await Promise.all(names.map(async name => {
+      const fh = await dir.getFileHandle(name);
+      const file = await fh.getFile();
+      const url = URL.createObjectURL(file);
+      fotoObjectUrls.push(url);
+      return {name, url};
+    }));
+    cont.innerHTML = '';
+    for(const {name, url} of items){
+      const div = document.createElement('div');
+      div.className = 'fotoThumb';
+      const img = document.createElement('img');
+      img.src = url;
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.textContent = '✕';
+      btn.onclick = () => borrarFoto(id, name);
+      div.appendChild(img);
+      div.appendChild(btn);
+      cont.appendChild(div);
+    }
+  }catch(e){
+    cont.innerHTML = '<div style="color:var(--danger);font-size:.85rem;">No pude cargar las fotos: ' + escHtml(e.message) + '</div>';
+  }
+}
+
+async function onAgregarFotos(ev){
+  const files = [...ev.target.files];
+  ev.target.value = '';
+  if(files.length === 0 || !currentEditId) return;
+  const cont = document.getElementById('fotosGrid');
+  const original = cont.innerHTML;
+  cont.innerHTML = '<div style="color:var(--gray);font-size:.85rem;">Subiendo fotos…</div>';
+  try{
+    const dir = await getPropertyPhotoDir(currentEditId, true);
+    const existing = await listPhotos(currentEditId);
+    let maxNum = 0;
+    existing.forEach(n => { const m = n.match(/^(\d+)\./); if(m) maxNum = Math.max(maxNum, parseInt(m[1], 10)); });
+    for(const file of files){
+      if(!/^image\//.test(file.type)) continue;
+      maxNum++;
+      let extension = (file.name.split('.').pop() || 'jpg').toLowerCase();
+      if(extension === 'jpeg') extension = 'jpg';
+      if(!['jpg','png','webp'].includes(extension)) extension = 'jpg';
+      const num = String(maxNum).padStart(2, '0');
+      const fh = await dir.getFileHandle(`${num}.${extension}`, {create:true});
+      const w = await fh.createWritable();
+      await w.write(file);
+      await w.close();
+    }
+  }catch(e){
+    cont.innerHTML = original;
+    await customAlert('No pude subir las fotos: ' + e.message);
+    return;
+  }
+  await renderFotos(currentEditId);
+}
+
+async function borrarFoto(id, name){
+  if(!(await customConfirm('¿Borrar esta foto?'))) return;
+  try{
+    const dir = await getPropertyPhotoDir(id, false);
+    await dir.removeEntry(name);
+  }catch(e){
+    await customAlert('No pude borrar la foto: ' + e.message);
+    return;
+  }
+  await renderFotos(id);
+}
+
+function limpiarFormulario(){
+  document.getElementById('formEditor').reset();
+  document.getElementById('fId').value = '';
+  document.getElementById('estadoGuardado').textContent = '';
+  document.getElementById('estadoGuardado').className = 'estado';
+}
+
+function nuevaPropiedad(){
+  limpiarFormulario();
+  currentEditId = null;
+  document.getElementById('editorTitulo').textContent = 'Nueva propiedad';
+  document.getElementById('fId').value = '(se genera al guardar)';
+  document.getElementById('seccionFotos').style.display = 'none';
+  document.getElementById('avisoFotos').style.display = 'block';
+  document.getElementById('btnBorrar').style.display = 'none';
+  document.getElementById('editorOverlay').classList.add('open');
+}
+
+async function abrirEditor(id){
+  const p = properties.find(x => x.id === id);
+  if(!p) return;
+  limpiarFormulario();
+  currentEditId = id;
+  document.getElementById('editorTitulo').textContent = 'Editar: ' + p.name;
+  document.getElementById('fId').value = p.id;
+  document.getElementById('fTipoInmueble').value = p.tipoInmueble;
+  document.getElementById('fTipo').value = p.tipo;
+  document.getElementById('fName').value = p.name || '';
+  document.getElementById('fZonaTexto').value = p.zona || '';
+  document.getElementById('fZonaKey').value = p.zonaKey;
+  document.getElementById('fPrecio').value = p.precio || '';
+  document.getElementById('fRec').value = p.rec ?? '';
+  document.getElementById('fEst').value = p.est ?? '';
+  document.getElementById('fM2').value = p.m2 ?? '';
+  document.getElementById('fBanos').value = p.banos ?? '';
+  document.querySelectorAll('.creditoChk').forEach(chk => {
+    chk.checked = (p.credito || []).includes(chk.value);
+  });
+  document.getElementById('fDesc').value = p.desc || '';
+  document.getElementById('fDetalle').value = p.detalle || '';
+  document.getElementById('seccionFotos').style.display = 'block';
+  document.getElementById('avisoFotos').style.display = 'none';
+  document.getElementById('btnBorrar').style.display = 'inline-block';
+  document.getElementById('editorOverlay').classList.add('open');
+  await renderFotos(id);
+}
+
+function cerrarEditor(){
+  document.getElementById('editorOverlay').classList.remove('open');
+  currentEditId = null;
+}
+
+async function guardarForm(ev){
+  ev.preventDefault();
+  const btnGuardar = ev.target.querySelector('button[type=submit]');
+  const tipoInmueble = document.getElementById('fTipoInmueble').value;
+  const tipo = document.getElementById('fTipo').value;
+  const name = document.getElementById('fName').value.trim();
+  const zona = document.getElementById('fZonaTexto').value.trim();
+  const zonaKey = document.getElementById('fZonaKey').value;
+  const precio = parseFloat(document.getElementById('fPrecio').value);
+
+  if(!name || !zona || !precio){
+    await customAlert('Faltan campos obligatorios: nombre, zona y precio.');
+    return;
+  }
+
+  const rec = document.getElementById('fRec').value ? parseInt(document.getElementById('fRec').value, 10) : null;
+  const est = document.getElementById('fEst').value ? parseInt(document.getElementById('fEst').value, 10) : null;
+  const m2 = document.getElementById('fM2').value ? parseFloat(document.getElementById('fM2').value) : null;
+  const banos = document.getElementById('fBanos').value.trim() || null;
+  const credito = [...document.querySelectorAll('.creditoChk:checked')].map(c => c.value);
+  const desc = document.getElementById('fDesc').value.trim();
+  const detalle = document.getElementById('fDetalle').value.trim();
+  const esTerreno = tipoInmueble === 'Terreno';
+
+  const isNew = !currentEditId;
+  const id = isNew ? generarId(tipoInmueble) : currentEditId;
+
+  const estadoEl = document.getElementById('estadoGuardado');
+  if(btnGuardar){ btnGuardar.disabled = true; btnGuardar.textContent = 'Guardando…'; }
+  estadoEl.className = 'estado';
+  estadoEl.textContent = '';
+
+  try{
+    const fotoNames = await listPhotos(id);
+    const fotos = fotoNames.length ? fotoNames.map(n => `fotos/${id}/${n}`) : undefined;
+
+    const obj = {id, tipoInmueble, name, zona, zonaKey, tipo, precio, rec, banos, est, m2, credito, desc, detalle};
+    if(fotos) obj.fotos = fotos;
+    if(esTerreno) obj.esTerreno = true;
+
+    if(!isNew){
+      const prev = properties.find(p => p.id === id);
+      if(prev && prev.archivoOrigen) obj.archivoOrigen = prev.archivoOrigen;
+      properties = properties.map(p => p.id === id ? obj : p);
+    } else {
+      properties.push(obj);
+    }
+
+    await guardarArchivo();
+    renderTabla();
+
+    estadoEl.className = 'estado ok';
+    if(isNew){
+      currentEditId = id;
+      document.getElementById('editorTitulo').textContent = 'Editar: ' + name;
+      document.getElementById('fId').value = id;
+      document.getElementById('seccionFotos').style.display = 'block';
+      document.getElementById('avisoFotos').style.display = 'none';
+      document.getElementById('btnBorrar').style.display = 'inline-block';
+      await renderFotos(id);
+      estadoEl.textContent = 'Propiedad guardada. Ya puedes agregar fotos abajo.';
+    } else {
+      estadoEl.textContent = 'Cambios guardados.';
+    }
+  }catch(e){
+    estadoEl.className = 'estado';
+    estadoEl.style.color = 'var(--danger)';
+    estadoEl.textContent = 'No pude guardar: ' + e.message;
+  }finally{
+    if(btnGuardar){ btnGuardar.disabled = false; btnGuardar.textContent = 'Guardar'; }
+  }
+}
+
+async function borrarPropiedad(id){
+  if(!dirHandle){
+    await customAlert('Primero conecta la carpeta del catálogo (arriba) antes de borrar propiedades.');
+    return;
+  }
+  const p = properties.find(x => x.id === id);
+  if(!(await customConfirm(`¿Seguro que quieres borrar "${p ? p.name : id}"? Esta acción no se puede deshacer.`))) return;
+  const borrarSusFotos = await customConfirm('¿También borrar su carpeta de fotos? Aceptar = sí, borrar fotos. Cancelar = dejarlas en el disco.');
+  const propiedadesOriginales = properties;
+  try{
+    if(borrarSusFotos){
+      try{
+        const fotosDir = await getFotosDirHandle(false);
+        await fotosDir.removeEntry(id, {recursive:true});
+      }catch(e){ /* puede que no tuviera fotos */ }
+    }
+    properties = properties.filter(x => x.id !== id);
+    await guardarArchivo();
+    if(currentEditId === id) cerrarEditor();
+    renderTabla();
+    await customAlert('Propiedad borrada y guardada en index.html.');
+  }catch(e){
+    properties = propiedadesOriginales; // el guardado falló: no dejar la propiedad "borrada" solo en memoria
+    await customAlert('No pude borrar la propiedad: ' + e.message);
+  }
+}
+
+async function borrarPropiedadActual(){
+  if(!currentEditId) return;
+  await borrarPropiedad(currentEditId);
+}
+
+// Red de seguridad: si algo truena sin haber sido capturado, avisa en vez
+// de dejar el panel sin reaccionar a nada.
+window.addEventListener('unhandledrejection', ev => {
+  console.error('Error no manejado:', ev.reason);
+  alert('Ocurrió un error inesperado: ' + (ev.reason && ev.reason.message ? ev.reason.message : ev.reason));
+});
+window.addEventListener('error', ev => {
+  console.error('Error no manejado:', ev.error || ev.message);
+});
+</script>
+</body>
+</html>
