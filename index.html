@@ -44,16 +44,17 @@
     border:1px solid rgba(230,194,74,.15);border-radius:50%;pointer-events:none;
   }
   .hero-inner{
-    max-width:1080px;
+    max-width:640px;
     margin:0 auto;
     display:flex;
+    flex-direction:column;
     align-items:center;
-    gap:52px;
+    text-align:center;
     padding:64px 32px;
     position:relative;
   }
-  .hero-text{flex:1;min-width:260px;}
-  .hero-logos{display:flex;align-items:center;gap:16px;margin-bottom:30px;}
+  .hero-text{width:100%;}
+  .hero-logos{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:30px;}
   .logo-personal{height:44px;width:auto;}
   .logo-alida{height:24px;width:auto;opacity:.85;}
   .hero-logos-divider{width:1px;height:26px;background:rgba(255,255,255,.25);}
@@ -99,19 +100,8 @@
     font-size:.85rem;
     color:rgba(255,255,255,.65);
   }
-  .hero-photo{
-    flex-shrink:0;
-    width:250px;
-    height:310px;
-    border-radius:var(--radius);
-    overflow:hidden;
-    border:1px solid rgba(230,194,74,.35);
-  }
-  .hero-photo img{width:100%;height:100%;object-fit:cover;display:block;}
   @media(max-width:760px){
-    .hero-inner{flex-direction:column-reverse;text-align:center;padding:44px 24px;gap:28px;}
-    .hero-logos{justify-content:center;}
-    .hero-photo{width:190px;height:230px;}
+    .hero-inner{padding:44px 24px;}
     header.hero h1{font-size:1.7rem;}
   }
   nav.tabs{
@@ -512,7 +502,6 @@
 
   @media(max-width:480px){
     header.hero h1{font-size:1.5rem;}
-    .hero-photo{width:150px;height:185px;}
     nav.tabs button{padding:9px 16px;font-size:10.5px;}
   }
   @media(max-width:600px){
@@ -546,9 +535,6 @@
       <div class="slogan">"Aprovecha tu inversión al máximo"</div>
       <button class="hero-cta" onclick="showTab('cuestionario')">🎯 Encuentra tu propiedad ideal</button>
       <div class="tel">Tel. 311 256 2702</div>
-    </div>
-    <div class="hero-photo">
-      <img src="foto-maximo.jpg" alt="Máximo Altamirano, Asesor Inmobiliario">
     </div>
   </div>
 </header>
