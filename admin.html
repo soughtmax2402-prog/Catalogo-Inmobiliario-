@@ -205,6 +205,11 @@
         </div>
       </div>
       <div class="campo">
+        <label style="display:flex;align-items:center;gap:8px;text-transform:none;font-size:.9rem;">
+          <input type="checkbox" id="fDestacada" style="width:auto;"> ★ Marcar como propiedad Destacada
+        </label>
+      </div>
+      <div class="campo">
         <label>Nombre de la propiedad *</label>
         <input type="text" id="fName" required placeholder='Ej: "Casa Los Álamos"'>
       </div>
@@ -551,6 +556,7 @@ function serializeProperty(p){
   if(p.archivoOrigen) l1 += `, archivoOrigen:${jsStr(p.archivoOrigen)}`;
   l1 += `, name:${jsStr(p.name)}, zona:${jsStr(p.zona)}, zonaKey:${jsStr(p.zonaKey)}, tipo:${jsStr(p.tipo)}`;
   if(p.esTerreno) l1 += `, esTerreno:true`;
+  if(p.destacada) l1 += `, destacada:true`;
   l1 += `, precio:${jsVal(p.precio)}, rec:${jsVal(p.rec)}, banos:${jsVal(p.banos)}, est:${jsVal(p.est)}, m2:${jsVal(p.m2)}`;
   l1 += `, credito:[${(p.credito||[]).map(jsStr).join(',')}]`;
   l1 += `, desc:${jsStr(p.desc || '')},`;
@@ -588,7 +594,7 @@ function renderTabla(){
   tbody.innerHTML = filtradas.map(p => `
     <tr>
       <td>${p.fotos && p.fotos.length ? `<img class="miniThumb" src="${p.fotos[0]}">` : '<div class="miniThumb sinFoto"></div>'}</td>
-      <td>${escHtml(p.name)}<br><small>${p.id}</small></td>
+      <td>${p.destacada ? '★ ' : ''}${escHtml(p.name)}<br><small>${p.id}</small></td>
       <td>${escHtml(p.tipoInmueble)}</td>
       <td>${p.tipo === 'renta' ? 'Renta' : 'Venta'}</td>
       <td>$${Number(p.precio).toLocaleString('es-MX')}</td>
@@ -730,6 +736,7 @@ async function abrirEditor(id){
   document.getElementById('fId').value = p.id;
   document.getElementById('fTipoInmueble').value = p.tipoInmueble;
   document.getElementById('fTipo').value = p.tipo;
+  document.getElementById('fDestacada').checked = !!p.destacada;
   document.getElementById('fName').value = p.name || '';
   document.getElementById('fZonaTexto').value = p.zona || '';
   document.getElementById('fZonaKey').value = p.zonaKey;
@@ -778,6 +785,7 @@ async function guardarForm(ev){
   const desc = document.getElementById('fDesc').value.trim();
   const detalle = document.getElementById('fDetalle').value.trim();
   const esTerreno = tipoInmueble === 'Terreno';
+  const destacada = document.getElementById('fDestacada').checked;
 
   const isNew = !currentEditId;
   const id = isNew ? generarId(tipoInmueble) : currentEditId;
@@ -794,6 +802,7 @@ async function guardarForm(ev){
     const obj = {id, tipoInmueble, name, zona, zonaKey, tipo, precio, rec, banos, est, m2, credito, desc, detalle};
     if(fotos) obj.fotos = fotos;
     if(esTerreno) obj.esTerreno = true;
+    if(destacada) obj.destacada = true;
 
     if(!isNew){
       const prev = properties.find(p => p.id === id);

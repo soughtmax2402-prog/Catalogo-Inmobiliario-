@@ -137,6 +137,28 @@
   section{display:none;}
   section.visible{display:block;}
 
+  /* Conóceme */
+  .conoceme-hero{text-align:center;max-width:640px;margin:0 auto 44px;}
+  .conoceme-hero h2{color:var(--navy-deep);font-size:1.9rem;margin-bottom:14px;}
+  .conoceme-lead{color:var(--gray);font-size:1.02rem;line-height:1.6;}
+  .conoceme-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:22px;
+    margin-bottom:44px;
+  }
+  .conoceme-card{
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:28px 22px;
+    text-align:center;
+  }
+  .conoceme-icon{font-size:1.8rem;margin-bottom:14px;}
+  .conoceme-card h3{color:var(--navy-deep);font-size:1.02rem;margin-bottom:8px;}
+  .conoceme-card p{color:var(--gray);font-size:.88rem;line-height:1.55;}
+  .conoceme-cta{text-align:center;}
+
   /* Questionnaire */
   #cuestionario .intro{
     text-align:center;
@@ -265,6 +287,39 @@
   }
 
   /* Catalog grid */
+  .tipo-block{margin-bottom:40px;}
+  .section-title{
+    color:var(--navy-deep);
+    font-size:1.2rem;
+    margin-bottom:16px;
+    padding-bottom:10px;
+    border-bottom:1px solid var(--line);
+  }
+  .destacadas-block{
+    background:linear-gradient(160deg,#fffdf6 0%,var(--ivory) 100%);
+    border:1px solid var(--gold);
+    border-radius:var(--radius);
+    padding:24px;
+    margin-bottom:44px;
+  }
+  .destacadas-title{
+    color:var(--navy-deep);
+    border-bottom-color:rgba(230,194,74,.5);
+  }
+  .card.destacada{border:2px solid var(--gold);}
+  .badge-destacada{
+    position:absolute;
+    bottom:10px;
+    left:10px;
+    background:var(--gold);
+    color:var(--navy-deep);
+    font-size:9.5px;
+    font-weight:700;
+    letter-spacing:.06em;
+    padding:4px 9px;
+    border-radius:2px;
+    text-transform:uppercase;
+  }
   .grid{
     display:grid;
     grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
@@ -283,8 +338,6 @@
   .card .photo{
     height:220px;
     background:linear-gradient(160deg,var(--navy) 0%,var(--navy-deep) 100%);
-    background-size:cover;
-    background-position:center;
     display:flex;
     align-items:center;
     justify-content:center;
@@ -294,7 +347,15 @@
     text-align:center;
     padding:10px;
     position:relative;
+    overflow:hidden;
     cursor:pointer;
+  }
+  .card .photo-img{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:cover;
   }
   .card .badge, .gallery .badge, .modal-box .photo .badge{
     position:absolute;
@@ -540,13 +601,46 @@
 </header>
 
 <nav class="tabs">
-  <button id="tabQuiz" class="active" onclick="showTab('cuestionario')">🎯 Encuentra tu propiedad ideal</button>
+  <button id="tabConoceme" class="active" onclick="showTab('conoceme')">👋 Conóceme</button>
+  <button id="tabQuiz" onclick="showTab('cuestionario')">🎯 Encuentra tu propiedad ideal</button>
   <button id="tabCat" onclick="showTab('catalogo')">🏘️ Ver catálogo completo</button>
 </nav>
 
 <main>
 
-  <section id="cuestionario" class="visible">
+  <section id="conoceme" class="visible">
+    <div class="conoceme-hero">
+      <h2>Conoce a tu asesor</h2>
+      <p class="conoceme-lead">Encontrar la propiedad correcta es una decisión importante — por eso te acompaño de cerca en cada paso, para que la decisión sea la correcta.</p>
+    </div>
+    <div class="conoceme-grid">
+      <div class="conoceme-card">
+        <div class="conoceme-icon">🏡</div>
+        <h3>Portafolio verificado</h3>
+        <p>Cada propiedad de este catálogo la reviso personalmente antes de publicarla.</p>
+      </div>
+      <div class="conoceme-card">
+        <div class="conoceme-icon">🤝</div>
+        <h3>Atención cercana</h3>
+        <p>Te acompaño desde la primera pregunta hasta la firma, a tu ritmo y sin presiones.</p>
+      </div>
+      <div class="conoceme-card">
+        <div class="conoceme-icon">📍</div>
+        <h3>Conocimiento local</h3>
+        <p>Especializado en Tepic, Xalisco, Bahía de Banderas y alrededores de Nayarit.</p>
+      </div>
+      <div class="conoceme-card">
+        <div class="conoceme-icon">🏢</div>
+        <h3>Respaldo de Alida33</h3>
+        <p>Agente afiliado a Alida33 Agencia Inmobiliaria, con toda la experiencia de la agencia detrás.</p>
+      </div>
+    </div>
+    <div class="conoceme-cta">
+      <button class="hero-cta" onclick="showTab('cuestionario')">🎯 Encuentra tu propiedad ideal</button>
+    </div>
+  </section>
+
+  <section id="cuestionario">
     <div class="intro">
       <h2>Cuéntanos qué buscas</h2>
       <p>Responde estas preguntas y te mostramos las propiedades de nuestro portafolio que más se acoplan a lo que necesitas.</p>
@@ -645,7 +739,7 @@
       </select>
     </div>
     <div id="contadorCatalogo" class="contador"></div>
-    <div class="grid" id="catalogGrid"></div>
+    <div id="catalogGrid"></div>
   </section>
 
 </main>
@@ -849,11 +943,13 @@ function cardHTML(p){
   const badge = p.tipo === "renta" ? "En renta" : "En venta";
   const precioTxt = p.tipo === "renta" ? money(p.precio) + " <small style='font-size:0.6em;color:#777'>/mes</small>" : money(p.precio);
   const hasImg = p.fotos && p.fotos.length;
-  const photoStyle = hasImg ? ` style="background-image:url('${p.fotos[0]}')"` : "";
+  const cardClass = p.destacada ? "card destacada" : "card";
+  const ribbon = p.destacada ? `<span class="badge-destacada">★ Destacada</span>` : "";
+  const photoImg = hasImg ? `<img class="photo-img" src="${p.fotos[0]}" loading="lazy" alt="${p.name}">` : "";
 
   return `
-  <div class="card">
-    <div class="photo"${photoStyle} onclick="openModal('${p.id}')"><span class="badge">${badge}</span><span class="badge-tipo">${p.tipoInmueble}</span>${hasImg ? "" : p.name}</div>
+  <div class="${cardClass}">
+    <div class="photo" onclick="openModal('${p.id}')">${photoImg}${ribbon}<span class="badge">${badge}</span><span class="badge-tipo">${p.tipoInmueble}</span>${hasImg ? "" : p.name}</div>
     <div class="body">
       <h4 onclick="openModal('${p.id}')">${p.name}</h4>
       <div class="zona">${p.zona}</div>
@@ -966,8 +1062,35 @@ function renderCatalog(){
   });
   if(fOrden === "precio_asc") list = list.slice().sort((a,b)=> a.precio - b.precio);
   if(fOrden === "precio_desc") list = list.slice().sort((a,b)=> b.precio - a.precio);
+
   document.getElementById("contadorCatalogo").innerHTML = contadorHTML(list) || "";
-  document.getElementById("catalogGrid").innerHTML = list.map(cardHTML).join("") || `<div class="empty">No hay propiedades con esos filtros por ahora.</div>`;
+  document.getElementById("catalogGrid").innerHTML = catalogSectionsHTML(list);
+}
+
+function catalogSectionsHTML(list){
+  if(list.length === 0) return `<div class="empty">No hay propiedades con esos filtros por ahora.</div>`;
+
+  let html = "";
+  const destacadas = list.filter(p => p.destacada);
+  if(destacadas.length){
+    html += `<div class="tipo-block destacadas-block">
+      <h3 class="section-title destacadas-title">★ Propiedades destacadas</h3>
+      <div class="grid">${destacadas.map(cardHTML).join("")}</div>
+    </div>`;
+  }
+
+  const orden = ["Casa","Departamento","Terreno","Local","Oficina"];
+  const labels = {Casa:"Casas", Departamento:"Departamentos", Terreno:"Terrenos", Local:"Locales", Oficina:"Oficinas"};
+  orden.forEach(tipo => {
+    const grupo = list.filter(p => p.tipoInmueble === tipo);
+    if(!grupo.length) return;
+    html += `<div class="tipo-block">
+      <h3 class="section-title">${labels[tipo]}</h3>
+      <div class="grid">${grupo.map(cardHTML).join("")}</div>
+    </div>`;
+  });
+
+  return html;
 }
 
 function updatePresupuestoLabel(){
@@ -1044,14 +1167,16 @@ function runQuiz(){
 }
 
 function showTab(tab){
+  document.getElementById("conoceme").classList.toggle("visible", tab==="conoceme");
   document.getElementById("cuestionario").classList.toggle("visible", tab==="cuestionario");
   document.getElementById("catalogo").classList.toggle("visible", tab==="catalogo");
+  document.getElementById("tabConoceme").classList.toggle("active", tab==="conoceme");
   document.getElementById("tabQuiz").classList.toggle("active", tab==="cuestionario");
   document.getElementById("tabCat").classList.toggle("active", tab==="catalogo");
   if(tab==="catalogo") renderCatalog();
+  window.scrollTo({top:0, behavior:"instant"});
 }
 
-renderCatalog();
 updatePresupuestoLabel();
 updateRecamarasLabel();
 </script>
