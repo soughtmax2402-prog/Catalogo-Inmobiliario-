@@ -89,13 +89,27 @@
   .creditoRow label{display:flex;align-items:center;gap:6px;font-size:.85rem;font-weight:400;text-transform:none;color:var(--carbon);}
 
   .seccionFotos{border-top:1px solid var(--line);margin-top:18px;padding-top:16px;}
-  .fotosGrid{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0;}
-  .fotoThumb{position:relative;width:90px;height:90px;}
-  .fotoThumb img{width:100%;height:100%;object-fit:cover;border-radius:3px;border:1px solid var(--line);}
-  .fotoThumb button{
+  .fotosGrid{display:flex;flex-wrap:wrap;gap:14px;margin:12px 0;}
+  .fotoThumb{position:relative;width:96px;}
+  .fotoThumb img{width:96px;height:96px;object-fit:cover;border-radius:3px;border:1px solid var(--line);display:block;}
+  .fotoThumb.portada img{border:2px solid var(--gold);}
+  .fotoPortadaTag{
+    position:absolute;top:-9px;left:50%;transform:translateX(-50%);
+    background:var(--gold);color:var(--navy-deep);font-size:.6rem;font-weight:700;
+    text-transform:uppercase;letter-spacing:.03em;padding:2px 7px;border-radius:8px;
+    white-space:nowrap;z-index:2;
+  }
+  .fotoDel{
     position:absolute;top:-8px;right:-8px;width:22px;height:22px;padding:0;border-radius:50%;
     background:var(--danger);font-size:.75rem;line-height:1;
   }
+  .fotoOrder{display:flex;gap:4px;margin-top:5px;}
+  .fotoOrder button{
+    flex:1;padding:4px 0;font-size:.7rem;background:var(--ivory);color:var(--navy);
+    border:1px solid var(--line);text-transform:none;letter-spacing:0;
+  }
+  .fotoOrder button:disabled{opacity:.3;cursor:not-allowed;}
+  .fotoOrder button:not(:disabled):hover{background:var(--gold);color:var(--navy-deep);}
   .avisoFotos{color:var(--gray);font-size:.85rem;background:var(--ivory);padding:12px;border-radius:2px;}
 
   .accionesEditor{display:flex;justify-content:space-between;align-items:center;margin-top:20px;gap:10px;flex-wrap:wrap;}
@@ -205,8 +219,11 @@
         </div>
       </div>
       <div class="campo">
-        <label style="display:flex;align-items:center;gap:8px;text-transform:none;font-size:.9rem;">
+        <label style="display:flex;align-items:center;gap:8px;text-transform:none;font-size:.9rem;margin-bottom:8px;">
           <input type="checkbox" id="fDestacada" style="width:auto;"> ★ Marcar como propiedad Destacada
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;text-transform:none;font-size:.9rem;">
+          <input type="checkbox" id="fTendencia" style="width:auto;"> 🔥 Marcar como Alta demanda
         </label>
       </div>
       <div class="campo">
@@ -274,8 +291,18 @@
         <label style="display:block;font-size:.78rem;font-weight:700;color:var(--navy);margin-bottom:8px;text-transform:uppercase;letter-spacing:.03em;">Fotos</label>
         <div id="avisoFotos" class="avisoFotos" style="display:none;">Guarda la propiedad primero (botón "Guardar" abajo) para poder agregar fotos.</div>
         <div id="seccionFotos" style="display:none;">
+          <p style="font-size:.78rem;color:var(--gray);margin-bottom:10px;">La primera foto (con borde dorado) es la portada — la que se ve en la tarjeta del catálogo. Usa ← → para cambiar el orden.</p>
           <div class="fotosGrid" id="fotosGrid"></div>
           <input type="file" id="inputFotos" accept="image/*" multiple onchange="onAgregarFotos(event)">
+          <div class="campo" style="margin-top:16px;">
+            <label>Encuadre de la foto de portada</label>
+            <div class="creditoRow">
+              <label><input type="radio" name="fotoPosicion" value="center" checked> Centro</label>
+              <label><input type="radio" name="fotoPosicion" value="top"> Arriba</label>
+              <label><input type="radio" name="fotoPosicion" value="bottom"> Abajo</label>
+            </div>
+            <p style="font-size:.75rem;color:var(--gray);margin-top:6px;">Úsalo si la parte importante de la foto (el techo, la fachada) se está cortando.</p>
+          </div>
         </div>
       </div>
 
@@ -557,6 +584,8 @@ function serializeProperty(p){
   l1 += `, name:${jsStr(p.name)}, zona:${jsStr(p.zona)}, zonaKey:${jsStr(p.zonaKey)}, tipo:${jsStr(p.tipo)}`;
   if(p.esTerreno) l1 += `, esTerreno:true`;
   if(p.destacada) l1 += `, destacada:true`;
+  if(p.tendencia) l1 += `, tendencia:true`;
+  if(p.fotoPosicion && p.fotoPosicion !== 'center') l1 += `, fotoPosicion:${jsStr(p.fotoPosicion)}`;
   l1 += `, precio:${jsVal(p.precio)}, rec:${jsVal(p.rec)}, banos:${jsVal(p.banos)}, est:${jsVal(p.est)}, m2:${jsVal(p.m2)}`;
   l1 += `, credito:[${(p.credito||[]).map(jsStr).join(',')}]`;
   l1 += `, desc:${jsStr(p.desc || '')},`;
@@ -594,7 +623,7 @@ function renderTabla(){
   tbody.innerHTML = filtradas.map(p => `
     <tr>
       <td>${p.fotos && p.fotos.length ? `<img class="miniThumb" src="${p.fotos[0]}">` : '<div class="miniThumb sinFoto"></div>'}</td>
-      <td>${p.destacada ? '★ ' : ''}${escHtml(p.name)}<br><small>${p.id}</small></td>
+      <td>${p.destacada ? '★ ' : ''}${p.tendencia ? '🔥 ' : ''}${escHtml(p.name)}<br><small>${p.id}</small></td>
       <td>${escHtml(p.tipoInmueble)}</td>
       <td>${p.tipo === 'renta' ? 'Renta' : 'Venta'}</td>
       <td>$${Number(p.precio).toLocaleString('es-MX')}</td>
@@ -647,22 +676,76 @@ async function renderFotos(id){
       return {name, url};
     }));
     cont.innerHTML = '';
-    for(const {name, url} of items){
+    items.forEach(({name, url}, i) => {
       const div = document.createElement('div');
       div.className = 'fotoThumb';
+      if(i === 0) div.classList.add('portada');
       const img = document.createElement('img');
       img.src = url;
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.textContent = '✕';
-      btn.onclick = () => borrarFoto(id, name);
+      const btnDel = document.createElement('button');
+      btnDel.type = 'button';
+      btnDel.className = 'fotoDel';
+      btnDel.textContent = '✕';
+      btnDel.title = 'Borrar esta foto';
+      btnDel.onclick = () => borrarFoto(id, name);
+      const orderBar = document.createElement('div');
+      orderBar.className = 'fotoOrder';
+      const btnLeft = document.createElement('button');
+      btnLeft.type = 'button';
+      btnLeft.textContent = '←';
+      btnLeft.title = 'Mover antes (más cerca de portada)';
+      btnLeft.disabled = i === 0;
+      btnLeft.onclick = () => moverFoto(id, i, -1);
+      const btnRight = document.createElement('button');
+      btnRight.type = 'button';
+      btnRight.textContent = '→';
+      btnRight.title = 'Mover después';
+      btnRight.disabled = i === items.length - 1;
+      btnRight.onclick = () => moverFoto(id, i, 1);
+      orderBar.appendChild(btnLeft);
+      orderBar.appendChild(btnRight);
+      if(i === 0){
+        const tag = document.createElement('div');
+        tag.className = 'fotoPortadaTag';
+        tag.textContent = 'Portada';
+        div.appendChild(tag);
+      }
       div.appendChild(img);
-      div.appendChild(btn);
+      div.appendChild(btnDel);
+      div.appendChild(orderBar);
       cont.appendChild(div);
-    }
+    });
   }catch(e){
     cont.innerHTML = '<div style="color:var(--danger);font-size:.85rem;">No pude cargar las fotos: ' + escHtml(e.message) + '</div>';
   }
+}
+
+async function moverFoto(id, index, direction){
+  const names = await listPhotos(id);
+  const j = index + direction;
+  if(j < 0 || j >= names.length) return;
+  const dir = await getPropertyPhotoDir(id, false);
+  try{
+    const fileA = await (await dir.getFileHandle(names[index])).getFile();
+    const fileB = await (await dir.getFileHandle(names[j])).getFile();
+    const numA = names[index].match(/^(\d+)\./)[1];
+    const numB = names[j].match(/^(\d+)\./)[1];
+    const extA = names[index].split('.').pop().toLowerCase();
+    const extB = names[j].split('.').pop().toLowerCase();
+    await dir.removeEntry(names[index]);
+    await dir.removeEntry(names[j]);
+    const fhA = await dir.getFileHandle(`${numA}.${extB}`, {create:true});
+    const wA = await fhA.createWritable();
+    await wA.write(fileB);
+    await wA.close();
+    const fhB = await dir.getFileHandle(`${numB}.${extA}`, {create:true});
+    const wB = await fhB.createWritable();
+    await wB.write(fileA);
+    await wB.close();
+  }catch(e){
+    await customAlert('No pude reordenar las fotos: ' + e.message);
+  }
+  await renderFotos(id);
 }
 
 async function onAgregarFotos(ev){
@@ -737,6 +820,9 @@ async function abrirEditor(id){
   document.getElementById('fTipoInmueble').value = p.tipoInmueble;
   document.getElementById('fTipo').value = p.tipo;
   document.getElementById('fDestacada').checked = !!p.destacada;
+  document.getElementById('fTendencia').checked = !!p.tendencia;
+  const posVal = p.fotoPosicion || 'center';
+  document.querySelectorAll('input[name=fotoPosicion]').forEach(r => { r.checked = (r.value === posVal); });
   document.getElementById('fName').value = p.name || '';
   document.getElementById('fZonaTexto').value = p.zona || '';
   document.getElementById('fZonaKey').value = p.zonaKey;
@@ -786,6 +872,9 @@ async function guardarForm(ev){
   const detalle = document.getElementById('fDetalle').value.trim();
   const esTerreno = tipoInmueble === 'Terreno';
   const destacada = document.getElementById('fDestacada').checked;
+  const tendencia = document.getElementById('fTendencia').checked;
+  const fotoPosicionEl = document.querySelector('input[name=fotoPosicion]:checked');
+  const fotoPosicion = fotoPosicionEl ? fotoPosicionEl.value : 'center';
 
   const isNew = !currentEditId;
   const id = isNew ? generarId(tipoInmueble) : currentEditId;
@@ -803,6 +892,8 @@ async function guardarForm(ev){
     if(fotos) obj.fotos = fotos;
     if(esTerreno) obj.esTerreno = true;
     if(destacada) obj.destacada = true;
+    if(tendencia) obj.tendencia = true;
+    if(fotoPosicion !== 'center') obj.fotoPosicion = fotoPosicion;
 
     if(!isNew){
       const prev = properties.find(p => p.id === id);

@@ -468,12 +468,36 @@
     border-bottom-color:rgba(230,194,74,.5);
   }
   .card.destacada{border:2px solid var(--gold);}
+  .tendencia-block{
+    background:linear-gradient(160deg,#fff6f6 0%,var(--ivory) 100%);
+    border:1px solid #D64545;
+    border-radius:var(--radius);
+    padding:24px;
+    margin-bottom:44px;
+  }
+  .tendencia-title{
+    color:var(--navy-deep);
+    border-bottom-color:rgba(214,69,69,.35);
+  }
   .badge-destacada{
     position:absolute;
     bottom:10px;
     left:10px;
     background:var(--gold);
     color:var(--navy-deep);
+    font-size:9.5px;
+    font-weight:700;
+    letter-spacing:.06em;
+    padding:4px 9px;
+    border-radius:2px;
+    text-transform:uppercase;
+  }
+  .badge-tendencia{
+    position:absolute;
+    bottom:10px;
+    right:10px;
+    background:#D64545;
+    color:#fff;
     font-size:9.5px;
     font-weight:700;
     letter-spacing:.06em;
@@ -1155,11 +1179,13 @@ function cardHTML(p){
   const hasImg = p.fotos && p.fotos.length;
   const cardClass = p.destacada ? "card destacada" : "card";
   const ribbon = p.destacada ? `<span class="badge-destacada">★ Destacada</span>` : "";
-  const photoImg = hasImg ? `<img class="photo-img" src="${p.fotos[0]}" loading="lazy" alt="${p.name}">` : "";
+  const ribbonTendencia = p.tendencia ? `<span class="badge-tendencia">🔥 Alta demanda</span>` : "";
+  const objPos = p.fotoPosicion === "top" ? "center top" : p.fotoPosicion === "bottom" ? "center bottom" : "center";
+  const photoImg = hasImg ? `<img class="photo-img" src="${p.fotos[0]}" loading="lazy" alt="${p.name}" style="object-position:${objPos}">` : "";
 
   return `
   <div class="${cardClass}">
-    <div class="photo" onclick="openModal('${p.id}')">${photoImg}${ribbon}<span class="badge">${badge}</span><span class="badge-tipo">${p.tipoInmueble}</span>${hasImg ? "" : p.name}</div>
+    <div class="photo" onclick="openModal('${p.id}')">${photoImg}${ribbon}${ribbonTendencia}<span class="badge">${badge}</span><span class="badge-tipo">${p.tipoInmueble}</span>${hasImg ? "" : p.name}</div>
     <div class="body">
       <h4 onclick="openModal('${p.id}')">${p.name}</h4>
       <div class="zona">${p.zona}</div>
@@ -1189,9 +1215,12 @@ function mediaHTML(p){
   const thumbs = p.fotos.length > 1
     ? `<div class="thumbs">${p.fotos.map((f,i)=>`<img src="${f}" class="${i===galleryIndex?'active':''}" onclick="event.stopPropagation();galleryIndex=${i};refreshModal();" loading="lazy" alt="${p.name} foto ${i+1}">`).join("")}</div>`
     : "";
+  const objPos = galleryIndex === 0
+    ? (p.fotoPosicion === "top" ? "center top" : p.fotoPosicion === "bottom" ? "center bottom" : "center")
+    : "center";
   return `
     <div class="gallery">
-      <img class="main-img" src="${p.fotos[galleryIndex]}" alt="${p.name}">
+      <img class="main-img" src="${p.fotos[galleryIndex]}" alt="${p.name}" style="object-position:${objPos}">
       <span class="badge">${badge}</span><span class="badge-tipo">${p.tipoInmueble}</span>
       ${arrows}
     </div>
@@ -1286,6 +1315,14 @@ function catalogSectionsHTML(list){
     html += `<div class="tipo-block destacadas-block">
       <h3 class="section-title destacadas-title">★ Propiedades destacadas</h3>
       <div class="grid">${destacadas.map(cardHTML).join("")}</div>
+    </div>`;
+  }
+
+  const tendencia = list.filter(p => p.tendencia);
+  if(tendencia.length){
+    html += `<div class="tipo-block tendencia-block">
+      <h3 class="section-title tendencia-title">🔥 Alta demanda — se están consultando esta semana</h3>
+      <div class="grid">${tendencia.map(cardHTML).join("")}</div>
     </div>`;
   }
 
